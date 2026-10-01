@@ -1,5 +1,5 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { Head, Link } from "@inertiajs/react";
 
 export default function Dashboard() {
     return (
@@ -11,16 +11,18 @@ export default function Dashboard() {
             }
         >
             <Head title="Dashboard" />
-
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6 text-gray-900">
-                            You're logged in!
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <section className="rounded-lg border bg-card p-6 shadow-sm">
+                <h3 className="text-lg font-semibold">LOI Requests</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                    View and track submitted letters of intent.
+                </p>
+                <Link
+                    href={route("requests.index")}
+                    className="mt-4 inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                >
+                    View all requests
+                </Link>
+            </section>
         </AuthenticatedLayout>
     );
 }
