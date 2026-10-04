@@ -12,7 +12,6 @@ class LoiRequestController extends Controller
     public function index(Request $request): Response
     {
         $requests = LoiRequest::query()
-            ->orderByDesc('request_date')
             ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
