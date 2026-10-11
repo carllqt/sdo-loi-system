@@ -4,6 +4,15 @@ export function formatName(request) {
         .join(" ");
 }
 
+export function maskEmail(email) {
+    if (!email || !email.includes("@")) return "—";
+
+    const [localPart, domain] = email.split("@");
+    const visibleCharacter = localPart.charAt(0);
+
+    return `${visibleCharacter}${"*".repeat(Math.max(localPart.length - 1, 3))}@${domain}`;
+}
+
 export function formatDate(date) {
     if (!date) return "—";
 

@@ -1,0 +1,123 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Schools;
+use Illuminate\Database\Seeder;
+
+class SchoolsSeeder extends Seeder
+{
+    /**
+     * Seed schools provided for the LOI request form.
+     */
+    public function run(): void
+    {
+        $schools = [
+            [305727, 'Abuan National High School'],
+            [103384, 'Aggassian Elementary School'],
+            [103412, 'Alibagu Elementary School'],
+            [300545, 'Alibagu National High School'],
+            [103354, 'Alinguigan 1st Elementary School'],
+            [501839, 'Alinguigan 2nd Integrated School'],
+            [103356, 'Alinguigan 3rd Elementary School'],
+            [103413, 'Arusip Elementary School'],
+            [103414, 'Bagong Silang Elementary School'],
+            [103365, 'Bagumbayan Elementary School'],
+            [103415, 'Baligatan Elementary School'],
+            [103357, 'Balla Elementary School'],
+            [103385, 'Ballacong Elementary School'],
+            [155505, 'Bangag Elementary School'],
+            [103387, 'Baribad Elementary School'],
+            [103359, 'Batong Labang Elementary School'],
+            [103416, 'Bigao Elementary School'],
+            [103417, 'Bliss Elementary School'],
+            [103419, 'Cabannungan 1st Elementary School'],
+            [103419, 'Cabannungan 2nd Elementary School'],
+            [103388, 'Cabeceria 19 Elementary School'],
+            [103389, 'Cabeceria 23 Elementary School'],
+            [103390, 'Cabeceria 24 Elementary School'],
+            [103392, 'Cabeceria 27 Elementary School'],
+            [103393, 'Cabeceria 3 Elementary School'],
+            [103395, 'Cabeceria 6 Elementary School'],
+            [103391, 'Cabeceria 25 Elementary School'],
+            [103386, 'Cadu Elementary School'],
+            [155506, 'Calindayagan Elementary School'],
+            [103420, 'Camunatan Elementary School'],
+            [103361, 'Capellan Elementary School'],
+            [103362, 'Capo Elementary School'],
+            [103396, 'Capugotan Elementary School'],
+            [103421, 'Carikkikan Elementary School'],
+            [103397, 'Casilagan Elementary School'],
+            [501548, 'Dappat Integrated School'],
+            [103399, 'Fugu Elementary School'],
+            [103363, 'Fuyo Elementary School'],
+            [103400, 'Gayong- Gayong Norte Elementary School'],
+            [500087, 'Gayong-Gayong Sur Integrated School'],
+            [103422, 'Guinatan Elementary School'],
+            [500992, 'Ilagan East Integrated SPED Center'],
+            [103402, 'Ilagan South CS'],
+            [103423, 'Ilagan West CS'],
+            [300540, 'Ilagan West NHS'],
+            [300542, 'Isabela National High School'],
+            [306105, 'Isabela School of Arts and TradElementary School - Main'],
+            [306149, 'ISAT-Cabannungan Annex'],
+            [103424, 'Lullutan Elementary School'],
+            [500080, 'Lupigue Integrated School'],
+            [103425, 'Malalam Elementary School'],
+            [103426, 'Malasin Elementary School'],
+            [500078, 'Manaring Integrated School'],
+            [103427, 'Mangcuram Elementary School'],
+            [103366, 'Marana 1st Elementary School'],
+            [103367, 'Marana 2nd Elementary School'],
+            [103368, 'Marana 3rd Elementary School'],
+            [103369, 'Minabang Elementary School'],
+            [103370, 'Morado Elementary School'],
+            [103428, 'Naguilian Baculud Elementary School'],
+            [103429, 'Namnama Elementary School'],
+            [103371, 'Nanaguan Elementary School'],
+            [103404, 'Nangalisan Elementary School'],
+            [103372, 'Pasa Elementary School'],
+            [103430, 'Pilar Elementary School'],
+            [103373, 'Rang-ayan Elementary School'],
+            [300543, 'Rang-ayan NHS (Isabela NHS - Rang-ayan Annex)'],
+            [103405, 'Sablang Elementary School'],
+            [103431, 'Salindingan Elementary School'],
+            [103374, 'San Andres Elementary School'],
+            [103406, 'San Antonio Elementary School'],
+            [300583, "San Antonio Nat'l. Agro-Ind'l. & Voc'l. HS"],
+            [103432, 'San Felipe Elementary School'],
+            [103433, 'San Ignacio Elementary School'],
+            [103375, 'San Juan Rugao Elementary School'],
+            [500018, 'San Lorenzo Integrated School'],
+            [103394, 'San Manuel Cabeceria 4 Elementary School'],
+            [155519, 'San Pablo-Quimalabasa PS'],
+            [500074, 'San Pedro Integrated School'],
+            [103408, 'San Rafael Elementary School'],
+            [300584, "San Rafael Nat'l & Voc'l HS (San Antonio NAIVHS-San Rafael Annex)"],
+            [103377, 'San Rodrigo Elementary School'],
+            [103434, 'Siffu Elementary School'],
+            [500731, 'Sindun Bayabo IS'],
+            [155527, 'Sindun Highway Elementary'],
+            [103411, 'Sindun Maride Elementary School'],
+            [103378, 'Sipay Elementary School'],
+            [103379, 'Sta. Catalina Elementary School'],
+            [300602, 'Sta. Isabel National High School'],
+            [103435, 'Sta. Isabel Norte Elementary School'],
+            [103436, 'Sta. Isabel Sur Elementary School'],
+            [103409, 'Sta. Maria Elementary School'],
+            [103380, 'Sta. Victoria Elementary School'],
+            [103437, 'Sto. Tomas Elementary School'],
+            [103381, 'Talaytay Elementary School'],
+            [103382, 'Tangcul-San Isidro Elementary School'],
+            [103438, 'Tubo Elementary School'],
+            [103383, 'Villa Imelda Elementary School'],
+        ];
+
+        foreach ($schools as [$code, $name]) {
+            Schools::firstOrCreate([
+                'code' => $code,
+                'name' => $name,
+            ]);
+        }
+    }
+}

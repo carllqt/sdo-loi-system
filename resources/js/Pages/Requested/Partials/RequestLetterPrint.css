@@ -1,0 +1,126 @@
+.loi-print-page {
+    position: relative;
+    box-sizing: border-box;
+    width: 8in;
+    min-height: 13in;
+    margin-inline: auto;
+    background: #fff;
+    color: #111;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 12pt;
+    line-height: 1.3;
+}
+
+.loi-print-header {
+    display: block;
+    margin: 0;
+}
+
+.loi-print-title {
+    margin: 0;
+    color: #111;
+    font-family: inherit;
+    font-size: 14pt;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.loi-print-date {
+    margin: 0.22in 0 0.3in;
+    text-align: right;
+}
+
+.loi-print-recipient p,
+.loi-print-signatory p,
+.loi-print-short-paragraph,
+.loi-print-salutation,
+.loi-print-closing,
+.loi-print-reference {
+    margin: 0;
+}
+
+.loi-print-recipient-emphasis {
+    font-weight: 700;
+}
+
+.loi-print-salutation {
+    margin-top: 0.18in;
+    margin-bottom: 0.16in;
+}
+
+.loi-print-paragraph {
+    margin: 0 0 0.16in;
+    text-indent: 0.45in;
+}
+
+.loi-print-signature-table {
+    width: 100%;
+    margin: 0.18in 0 0.15in;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.loi-print-signature-table th,
+.loi-print-signature-table td {
+    padding: 0 0.08in 0.04in 0;
+    border: 0;
+    color: #111;
+    font: inherit;
+    text-align: left;
+    vertical-align: bottom;
+    overflow-wrap: anywhere;
+}
+
+.loi-print-signature-table th {
+    font-weight: 400;
+}
+
+.loi-print-name-column {
+    width: 38%;
+}
+
+.loi-print-position-column {
+    width: 31%;
+}
+
+.loi-print-signature-column {
+    width: 31%;
+}
+
+.loi-print-signature-line {
+    display: block;
+    width: 100%;
+    height: 0.24in;
+    border-bottom: 1px solid #111;
+}
+
+.loi-print-short-paragraph + .loi-print-short-paragraph {
+    margin-top: 0.08in;
+}
+
+.loi-print-closing {
+    margin-top: 0.2in;
+}
+
+.loi-print-signatory {
+    width: 62%;
+    margin: 0.48in 0 0 auto;
+    text-align: center;
+}
+
+.loi-print-signatory-name {
+    font-weight: 700 !important;
+}
+
+.loi-print-reference {
+    margin-top: 0.18in;
+    font-size: 10pt;
+}
+
+.loi-print-footer {
+    display: block;
+}
+
+
+
