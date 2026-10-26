@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\LoiRequest;
+use App\Services\EmployeeRequestIdentity;
+use App\Services\GoogleSheetSync;
 use Illuminate\Database\Seeder;
 
 class LoiRequestSeeder extends Seeder
@@ -10,11 +12,15 @@ class LoiRequestSeeder extends Seeder
     /**
      * Seed the application's database.
      */
-    public function run(): void
+    public function run(GoogleSheetSync $sync, EmployeeRequestIdentity $identity): void
     {
+        // Uses the same configured response Sheet as the Requested module's sync button.
+        $result = $sync->run();
+
         $requests = [
             [
                 'first_name' => 'Maria',
+                'gender' => 'Female',
                 'middle_name' => 'Santos',
                 'last_name' => 'Dela Cruz',
                 'position' => 'Teacher I',
@@ -25,6 +31,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Juan',
+                'gender' => 'Male',
                 'middle_name' => 'Garcia',
                 'last_name' => 'Reyes',
                 'position' => 'Teacher II',
@@ -35,6 +42,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Ana',
+                'gender' => 'Female',
                 'middle_name' => 'Lopez',
                 'last_name' => 'Mendoza',
                 'position' => 'Teacher I',
@@ -45,6 +53,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Carlos',
+                'gender' => 'Male',
                 'middle_name' => 'Ramos',
                 'last_name' => 'Santos',
                 'position' => 'Teacher III',
@@ -55,6 +64,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Liza',
+                'gender' => 'Female',
                 'middle_name' => 'Bautista',
                 'last_name' => 'Navarro',
                 'position' => 'Teacher I',
@@ -65,6 +75,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Mark',
+                'gender' => 'Male',
                 'middle_name' => 'Villanueva',
                 'last_name' => 'Garcia',
                 'position' => 'Teacher II',
@@ -75,6 +86,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Rosa',
+                'gender' => 'Female',
                 'middle_name' => 'Fernandez',
                 'last_name' => 'Aquino',
                 'position' => 'Teacher I',
@@ -85,6 +97,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Kevin',
+                'gender' => 'Male',
                 'middle_name' => 'Dizon',
                 'last_name' => 'Torres',
                 'position' => 'Teacher III',
@@ -95,6 +108,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Elena',
+                'gender' => 'Female',
                 'middle_name' => 'Castillo',
                 'last_name' => 'Flores',
                 'position' => 'Teacher II',
@@ -105,6 +119,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Robert',
+                'gender' => 'Male',
                 'middle_name' => 'Magsaysay',
                 'last_name' => 'Cruz',
                 'position' => 'Teacher I',
@@ -115,6 +130,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Sofia',
+                'gender' => 'Female',
                 'middle_name' => 'Rivera',
                 'last_name' => 'Garcia',
                 'position' => 'Teacher II',
@@ -125,6 +141,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Daniel',
+                'gender' => 'Male',
                 'middle_name' => 'Aquino',
                 'last_name' => 'Ramos',
                 'position' => 'Teacher I',
@@ -135,6 +152,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Patricia',
+                'gender' => 'Female',
                 'middle_name' => 'Lim',
                 'last_name' => 'Domingo',
                 'position' => 'Teacher III',
@@ -145,6 +163,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Michael',
+                'gender' => 'Male',
                 'middle_name' => 'Tan',
                 'last_name' => 'Santiago',
                 'position' => 'Teacher II',
@@ -155,6 +174,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Christine',
+                'gender' => 'Female',
                 'middle_name' => 'Reyes',
                 'last_name' => 'Villanueva',
                 'position' => 'Teacher I',
@@ -165,6 +185,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Anthony',
+                'gender' => 'Male',
                 'middle_name' => 'Dela Cruz',
                 'last_name' => 'Mendoza',
                 'position' => 'Teacher II',
@@ -175,6 +196,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Jennifer',
+                'gender' => 'Female',
                 'middle_name' => 'Santos',
                 'last_name' => 'Rivera',
                 'position' => 'Teacher I',
@@ -185,6 +207,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Patrick',
+                'gender' => 'Male',
                 'middle_name' => 'Garcia',
                 'last_name' => 'Navarro',
                 'position' => 'Teacher III',
@@ -195,6 +218,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Angela',
+                'gender' => 'Female',
                 'middle_name' => 'Lopez',
                 'last_name' => 'Torres',
                 'position' => 'Teacher II',
@@ -205,6 +229,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Jonathan',
+                'gender' => 'Male',
                 'middle_name' => 'Bautista',
                 'last_name' => 'Flores',
                 'position' => 'Teacher I',
@@ -215,6 +240,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Michelle',
+                'gender' => 'Female',
                 'middle_name' => 'Castillo',
                 'last_name' => 'Aquino',
                 'position' => 'Teacher II',
@@ -225,6 +251,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Steven',
+                'gender' => 'Male',
                 'middle_name' => 'Fernandez',
                 'last_name' => 'Cruz',
                 'position' => 'Teacher III',
@@ -235,6 +262,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Rachel',
+                'gender' => 'Female',
                 'middle_name' => 'Dizon',
                 'last_name' => 'Reyes',
                 'position' => 'Teacher I',
@@ -245,6 +273,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Brian',
+                'gender' => 'Male',
                 'middle_name' => 'Magsaysay',
                 'last_name' => 'Santos',
                 'position' => 'Teacher II',
@@ -255,6 +284,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Nicole',
+                'gender' => 'Female',
                 'middle_name' => 'Villanueva',
                 'last_name' => 'Garcia',
                 'position' => 'Teacher I',
@@ -265,6 +295,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Joshua',
+                'gender' => 'Male',
                 'middle_name' => 'Ramos',
                 'last_name' => 'Dela Cruz',
                 'position' => 'Teacher III',
@@ -275,6 +306,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Stephanie',
+                'gender' => 'Female',
                 'middle_name' => 'Domingo',
                 'last_name' => 'Mendoza',
                 'position' => 'Teacher II',
@@ -285,6 +317,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Ryan',
+                'gender' => 'Male',
                 'middle_name' => 'Santiago',
                 'last_name' => 'Aquino',
                 'position' => 'Teacher I',
@@ -295,6 +328,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Catherine',
+                'gender' => 'Female',
                 'middle_name' => 'Rivera',
                 'last_name' => 'Navarro',
                 'position' => 'Teacher III',
@@ -305,6 +339,7 @@ class LoiRequestSeeder extends Seeder
             ],
             [
                 'first_name' => 'Edward',
+                'gender' => 'Male',
                 'middle_name' => 'Tan',
                 'last_name' => 'Flores',
                 'position' => 'Teacher II',
@@ -315,8 +350,41 @@ class LoiRequestSeeder extends Seeder
             ],
         ];
 
-        foreach ($requests as $request) {
-            LoiRequest::create($request);
+        $sampleGendersUpdated = $identity->exclusively(function () use ($identity, $requests) {
+            $employees = $identity->existingKeys();
+            $updated = 0;
+            foreach ($requests as $request) {
+                $key = $identity->key($request);
+                if (!isset($employees[$key])) {
+                    LoiRequest::create($request);
+                    $employees[$key] = true;
+                } else {
+                    // Only fill missing gender on these exact demo records.
+                    // Never apply fictional seed genders to imported employees.
+                    $samples = LoiRequest::query()
+                        ->where('email', $request['email'])
+                        ->whereNull('google_source_key')
+                        ->where(fn ($query) => $query->whereNull('gender')->orWhere('gender', ''))
+                        ->get();
+                    foreach ($samples as $sample) {
+                        if ($identity->key($sample->getAttributes()) === $key) {
+                            $sample->update(['gender' => $request['gender']]);
+                            $updated++;
+                        }
+                    }
+                }
+            }
+            return $updated;
+        });
+
+        $this->command?->info("Gender filled for {$sampleGendersUpdated} existing sample requests.");
+        $this->command?->info("Google Sheet: {$result['imported']} imported, {$result['skipped']} duplicates skipped, {$result['invalid']} invalid.");
+        $this->command?->info("Gender filled for {$result['gender_updated']} existing requests.");
+        foreach ($result['issues'] as $issue) {
+            $this->command?->warn($issue);
+        }
+        if ($result['missing_email'] > 0) {
+            $this->command?->warn("{$result['missing_email']} imported requests have no notification email address.");
         }
     }
 }

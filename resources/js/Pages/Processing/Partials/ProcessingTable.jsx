@@ -1,10 +1,11 @@
+import { useState } from "react";
+import { router } from "@inertiajs/react";
 import {
+    Check,
     BriefcaseBusiness,
     CalendarDays,
-    CheckCircle2,
     Clock3,
     GraduationCap,
-    LoaderCircle,
     Mail,
     UserRound,
 } from "lucide-react";
@@ -17,7 +18,9 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/Components/ui/button";
 import TablePagination from "@/Components/TablePagination";
+import { useToast } from "@/Components/ToastContext";
 import { formatName, formatDate, maskEmail, statusClasses } from "@/Pages/utils";
 
 const columnIcons = {
@@ -29,13 +32,47 @@ const columnIcons = {
     "Request Date": CalendarDays,
 };
 
-function StatusIcon({ status }) {
-    if (status === "Completed") return <CheckCircle2 className="size-3.5" />;
-    if (status === "Processing") return <LoaderCircle className="size-3.5 animate-spin" />;
-    return <Clock3 className="size-3.5" />;
-}
-
 export default function ProcessingTable({ requests }) {
+    const [completingId, setCompletingId] = useState(null);
+    const [sendingEmailId, setSendingEmailId] = useState(null);
+    const toast = useToast();
+
+    const moveToCompleted = (request) => {
+        setCompletingId(request.id);
+
+        router.patch(route("requests.complete", request.id), {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success("Request moved to Completed", {
+                    description: `${formatName(request)} now appears in the Completed module.`,
+                });
+            },
+            onError: () => {
+                toast.error("Could not move request to Completed");
+            },
+            onFinish: () => setCompletingId(null),
+        });
+    };
+
+    const sendProcessedEmail = (request) => {
+        setSendingEmailId(request.id);
+
+        router.post(route("requests.notifyProcessed", request.id), {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success("Notification submitted", {
+                    description: `The email service accepted the notice for ${formatName(request)}. Delivery may take a moment.`,
+                });
+            },
+            onError: (errors) => {
+                toast.error(errors.email_title ?? "Could not send notification email", {
+                    description: errors.email ?? "An unexpected error occurred. Refresh the page and try again.",
+                });
+            },
+            onFinish: () => setSendingEmailId(null),
+        });
+    };
+
     return (
         <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
             <Table className="min-w-[800px]">
@@ -49,6 +86,9 @@ export default function ProcessingTable({ requests }) {
                                 </span>
                             </TableHead>
                         ))}
+                        <TableHead className="px-4 text-xs font-bold uppercase tracking-wide text-foreground">
+                            Actions
+                        </TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -61,16 +101,43 @@ export default function ProcessingTable({ requests }) {
                                     <TableCell className="px-4 py-3 text-muted-foreground">{maskEmail(request.email)}</TableCell>
                                     <TableCell className="px-4 py-3">
                                         <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${statusClasses(request.status)}`}>
-                                            <StatusIcon status={request.status} />
                                             {request.status}
                                         </span>
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-muted-foreground">{formatDate(request.request_date)}</TableCell>
+                                    <TableCell className="px-4 py-3">
+                                        <div className="flex items-center gap-1">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="icon"
+                                                className="text-sky-700 hover:bg-sky-50 hover:text-sky-800"
+                                                aria-label={`Send processed-documents email to ${formatName(request)}`}
+                                                title="Send processed-documents email"
+                                                disabled={sendingEmailId !== null || completingId !== null}
+                                                onClick={() => sendProcessedEmail(request)}
+                                            >
+                                                <Mail className="size-4" />
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="icon"
+                                                className="text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
+                                                aria-label={`Move ${formatName(request)} to Completed`}
+                                                title="Move to Completed"
+                                                disabled={completingId !== null || sendingEmailId !== null}
+                                                onClick={() => moveToCompleted(request)}
+                                            >
+                                                <Check className="size-4" />
+                                            </Button>
+                                        </div>
+                                    </TableCell>
                                 </TableRow>
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan="6" className="h-32 text-center text-muted-foreground">
+                                <TableCell colSpan="7" className="h-32 text-center text-muted-foreground">
                                     No LOI requests found.
                                 </TableCell>
                             </TableRow>

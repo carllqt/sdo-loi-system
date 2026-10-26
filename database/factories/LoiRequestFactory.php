@@ -17,8 +17,17 @@ class LoiRequestFactory extends Factory
      */
     public function definition(): array
     {
+        $gender = fake()->randomElement(['Male', 'Female']);
         return [
-            //
+            'first_name' => fake()->firstName(strtolower($gender)),
+            'middle_name' => fake()->lastName(),
+            'last_name' => fake()->lastName(),
+            'gender' => $gender,
+            'position' => 'Teacher I',
+            'school' => 'Example School',
+            'email' => fake()->unique()->safeEmail(),
+            'status' => 'Pending',
+            'request_date' => now()->toDateString(),
         ];
     }
 }

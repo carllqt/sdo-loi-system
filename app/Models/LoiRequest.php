@@ -14,12 +14,16 @@ class LoiRequest extends Model
         'first_name',
         'middle_name',
         'last_name',
+        'gender',
         'position',
         'school',
         'email',
         'status',
         'request_date',
+        'google_source_key',
     ];
+
+    protected $hidden = ['google_source_key'];
 
     protected function casts(): array
     {

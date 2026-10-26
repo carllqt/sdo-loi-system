@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('middle_name');
             $table->string('last_name');
             $table->string('position');
+            $table->enum('gender', ['Male', 'Female']);
             $table->string('school');
             $table->string('email');
             $table->enum('status', [
@@ -26,6 +27,7 @@ return new class extends Migration
                 'Completed',
             ])->default('Pending');
             $table->date('request_date');
+            $table->string('google_source_key', 64)->nullable()->unique();
             $table->timestamps();
         });
     }

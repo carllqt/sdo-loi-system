@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Slot } from "radix-ui";
 import { cn } from "@/lib/utils";
 
 const HighlightContext = React.createContext(null);
@@ -37,29 +38,31 @@ function Highlight({
     );
 }
 
-function HighlightItem({
+const HighlightItem = React.forwardRef(function HighlightItem({
     children,
     activeClassName = "",
     className,
+    onMouseEnter,
     ...props
-}) {
+}, ref) {
     const context = React.useContext(HighlightContext);
     const id = React.useId();
     const active = context?.active === id;
 
-    return React.cloneElement(React.Children.only(children), {
-        ...props,
-        className: cn(
-            children.props.className,
-            className,
-            active && context?.enabled && activeClassName,
-        ),
-        "data-highlight": active && context?.enabled ? "" : undefined,
-        onMouseEnter: (event) => {
-            children.props.onMouseEnter?.(event);
-            context?.setActive(id);
-        },
-    });
-}
+    return (
+        <Slot.Root
+            ref={ref}
+            {...props}
+            className={cn(className, active && context?.enabled && activeClassName)}
+            data-highlight={active && context?.enabled ? "" : undefined}
+            onMouseEnter={(event) => {
+                onMouseEnter?.(event);
+                context?.setActive(id);
+            }}
+        >
+            {React.Children.only(children)}
+        </Slot.Root>
+    );
+});
 
 export { Highlight, HighlightItem };

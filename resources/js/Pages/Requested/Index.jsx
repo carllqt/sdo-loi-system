@@ -1,10 +1,32 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head } from "@inertiajs/react";
-import { ClipboardList } from "lucide-react";
+import { Head, router } from "@inertiajs/react";
+import { useState } from "react";
+import { ClipboardList, RefreshCw } from "lucide-react";
+import { Button } from "@/Components/ui/button";
+import { useToast } from "@/Components/ToastContext";
+import AddRequestDialog from "./Partials/AddRequestDialog";
 
 import RequestedTable from "./Partials/RequestedTable";
 
-export default function Index({ requests }) {
+export default function Index({ requests, positions, schools, syncResult }) {
+    const [syncing, setSyncing] = useState(false);
+    const [syncError, setSyncError] = useState("");
+    const toast = useToast();
+    const sync = () => {
+        setSyncing(true);
+        setSyncError("");
+        router.post(route("requests.syncGoogleSheet"), {}, {
+            preserveScroll: true,
+            onSuccess: (page) => {
+                const result = page.props.syncResult;
+                if (result) toast.success("Google Forms sync finished", {
+                    description: `${result.imported} added · ${result.skipped} duplicates skipped · ${result.gender_updated ?? 0} genders filled · ${result.invalid} need correction`,
+                });
+            },
+            onError: (errors) => setSyncError(errors.sync ?? "Could not sync the Sheet. Please try again."),
+            onFinish: () => setSyncing(false),
+        });
+    };
     return (
         <AuthenticatedLayout
             breadcrumbs={{
@@ -31,6 +53,21 @@ export default function Index({ requests }) {
                         <p className="mt-1 text-2xl font-semibold">{requests.total}</p>
                     </div>
                 </div>
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                    <Button type="button" size="lg" variant="outline" disabled={syncing} onClick={sync}>
+                        <RefreshCw className="size-4" /> {syncing ? "Syncing…" : "Sync Google Forms"}
+                    </Button>
+                    <AddRequestDialog positions={positions} schools={schools} />
+                </div>
+                {syncError && <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{syncError}</p>}
+                {syncResult && !syncError && (
+                    <div role="status" className="rounded-lg border bg-card p-4 text-sm">
+                        <p className="font-medium">Last sync: {syncResult.imported} added, {syncResult.skipped} duplicates skipped, {syncResult.invalid} need correction.</p>
+                        {syncResult.gender_updated > 0 && <p className="mt-1 text-muted-foreground">Gender filled for {syncResult.gender_updated} existing requests.</p>}
+                        {syncResult.missing_email > 0 && <p className="mt-1 text-muted-foreground">{syncResult.missing_email} new requests have no email address. Collect email addresses in the Form for notification emails.</p>}
+                        {syncResult.issues?.length > 0 && <ul className="mt-2 list-inside list-disc text-destructive">{syncResult.issues.map((issue) => <li key={issue}>{issue}</li>)}</ul>}
+                    </div>
+                )}
                 <RequestedTable requests={requests} />
             </section>
         </AuthenticatedLayout>
