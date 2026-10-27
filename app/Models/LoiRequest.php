@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use Database\Factories\LoiRequestFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class LoiRequest extends Model
 {
-    /** @use HasFactory<\Database\Factories\LoiRequestFactory> */
+    /** @use HasFactory<LoiRequestFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -29,6 +30,7 @@ class LoiRequest extends Model
     {
         return [
             'request_date' => 'date',
+            'processed_email_sent_at' => 'datetime',
         ];
     }
 }

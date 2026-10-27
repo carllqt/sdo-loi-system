@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/Components/ui/button";
 import TablePagination from "@/Components/TablePagination";
+import ProcessedEmailStatus from "@/Components/ProcessedEmailStatus";
 import { useToast } from "@/Components/ToastContext";
 import { formatName, formatDate, maskEmail, statusClasses } from "@/Pages/utils";
 
@@ -47,8 +48,10 @@ export default function ProcessingTable({ requests }) {
                     description: `${formatName(request)} now appears in the Completed module.`,
                 });
             },
-            onError: () => {
-                toast.error("Could not move request to Completed");
+            onError: (errors) => {
+                toast.error("Could not move request to Completed", {
+                    description: errors.request ?? "Refresh the page and try again.",
+                });
             },
             onFinish: () => setCompletingId(null),
         });
@@ -100,9 +103,12 @@ export default function ProcessingTable({ requests }) {
                                     <TableCell className="px-4 py-3 text-muted-foreground">{request.school}</TableCell>
                                     <TableCell className="px-4 py-3 text-muted-foreground">{maskEmail(request.email)}</TableCell>
                                     <TableCell className="px-4 py-3">
-                                        <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${statusClasses(request.status)}`}>
-                                            {request.status}
-                                        </span>
+                                        <div className="flex flex-col items-start gap-1.5">
+                                            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${statusClasses(request.status)}`}>
+                                                {request.status}
+                                            </span>
+                                            <ProcessedEmailStatus sentAt={request.processed_email_sent_at} />
+                                        </div>
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-muted-foreground">{formatDate(request.request_date)}</TableCell>
                                     <TableCell className="px-4 py-3">
@@ -125,8 +131,8 @@ export default function ProcessingTable({ requests }) {
                                                 size="icon"
                                                 className="text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
                                                 aria-label={`Move ${formatName(request)} to Completed`}
-                                                title="Move to Completed"
-                                                disabled={completingId !== null || sendingEmailId !== null}
+                                                title={request.processed_email_sent_at ? "Move to Completed" : "Send the notification email first"}
+                                                disabled={!request.processed_email_sent_at || completingId !== null || sendingEmailId !== null}
                                                 onClick={() => moveToCompleted(request)}
                                             >
                                                 <Check className="size-4" />

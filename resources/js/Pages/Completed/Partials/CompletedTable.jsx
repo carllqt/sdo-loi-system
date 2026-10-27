@@ -18,6 +18,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import TablePagination from "@/Components/TablePagination";
+import ProcessedEmailStatus from "@/Components/ProcessedEmailStatus";
 import { formatName, formatDate, maskEmail, statusClasses } from "@/Pages/utils";
 
 const columnIcons = {
@@ -60,10 +61,13 @@ export default function CompletedTable({ requests }) {
                                     <TableCell className="px-4 py-3 text-muted-foreground">{request.school}</TableCell>
                                     <TableCell className="px-4 py-3 text-muted-foreground">{maskEmail(request.email)}</TableCell>
                                     <TableCell className="px-4 py-3">
-                                        <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${statusClasses(request.status)}`}>
-                                            <StatusIcon status={request.status} />
-                                            {request.status}
-                                        </span>
+                                        <div className="flex flex-col items-start gap-1.5">
+                                            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${statusClasses(request.status)}`}>
+                                                <StatusIcon status={request.status} />
+                                                {request.status}
+                                            </span>
+                                            <ProcessedEmailStatus sentAt={request.processed_email_sent_at} />
+                                        </div>
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-muted-foreground">{formatDate(request.request_date)}</TableCell>
                                 </TableRow>

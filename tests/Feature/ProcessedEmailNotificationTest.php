@@ -14,7 +14,6 @@ use Illuminate\Testing\TestResponse;
 use Inertia\Testing\AssertableInertia;
 use Mockery;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Resend\Exceptions\ErrorException;
 use RuntimeException;
 use Symfony\Component\Mailer\Exception\TransportException;
 use Tests\TestCase;
@@ -29,7 +28,7 @@ class ProcessedEmailNotificationTest extends TestCase
         parent::setUp();
 
         config([
-            'services.resend.key' => 're_test_only_not_a_real_key',
+            'mail.default' => 'smtp',
             'mail.from.address' => 'notifications@school.test',
         ]);
 
@@ -79,6 +78,7 @@ class ProcessedEmailNotificationTest extends TestCase
 
         Mail::assertNothingSent();
         $this->assertSame($request->status, $request->fresh()->status);
+        $this->assertNull($request->fresh()->processed_email_sent_at);
     }
 
     public static function invalidRequestProvider(): array
@@ -125,12 +125,15 @@ class ProcessedEmailNotificationTest extends TestCase
 
         Mail::assertNothingSent();
         $this->assertSame('Processing', $request->fresh()->status);
+        $this->assertNull($request->fresh()->processed_email_sent_at);
     }
 
     public static function invalidConfigurationProvider(): array
     {
         return [
-            'missing key' => [['services.resend.key' => ''], 'Email service is not configured'],
+            'log mailer' => [['mail.default' => 'log'], 'Email service is not configured'],
+            'array mailer' => [['mail.default' => 'array'], 'Email service is not configured'],
+            'missing mailer' => [['mail.default' => 'unconfigured'], 'Email service is not configured'],
             'placeholder sender' => [['mail.from.address' => 'hello@example.com'], 'Sender email is not configured'],
             'malformed sender' => [['mail.from.address' => 'school-notifications'], 'Sender email is not configured'],
         ];
@@ -157,15 +160,14 @@ class ProcessedEmailNotificationTest extends TestCase
         $this->assertStringNotContainsString('C:\\private\\credentials.json', $description);
         $this->assertStringNotContainsString('owner@private.test', $description);
         $this->assertSame('Processing', $request->fresh()->status);
+        $this->assertNull($request->fresh()->processed_email_sent_at);
     }
 
     public static function transportFailureProvider(): array
     {
-        $providerError = static fn (string $name, int $status, string $message): TransportException => new TransportException('Unable to send the notification.', 0, new ErrorException([
-            'name' => $name,
-            'statusCode' => $status,
-            'message' => $message,
-        ]));
+        $providerError = static fn (int $status, string $message): TransportException => new TransportException(
+            'Unable to send the notification.', 0, new RuntimeException($message, $status),
+        );
 
         return [
             'nested certificate error' => [
@@ -175,37 +177,35 @@ class ProcessedEmailNotificationTest extends TestCase
                 'Secure connection failed',
             ],
             'test sender restriction' => [
-                $providerError('validation_error', 403, 'You can only send testing emails to your own email address (owner@private.test).'),
+                $providerError(403, 'You can only send testing emails to your own email address (owner@private.test).'),
                 'Test sender restriction',
             ],
             'unverified domain' => [
-                $providerError('validation_error', 403, 'The school.test domain is not verified. Please add and verify your domain.'),
+                $providerError(403, 'The school.test domain is not verified. Please add and verify your domain.'),
                 'Sender domain is not verified',
             ],
             'invalid api key' => [
-                $providerError('validation_error', 401, 'API key is invalid: re_private_secret_for_test'),
+                $providerError(401, 'API key is invalid: re_private_secret_for_test'),
                 'Email service authentication failed',
             ],
             'rate limit' => [
-                $providerError('rate_limit_exceeded', 429, 'Too many requests. Please try again later.'),
+                $providerError(429, 'Too many requests. Please try again later.'),
                 'Too many email requests',
             ],
             'recipient mailbox rejected' => [
-                $providerError('validation_error', 422, 'Recipient address rejected: mailbox not found'),
+                $providerError(422, 'Recipient address rejected: mailbox not found'),
                 'Recipient email was rejected',
             ],
             'provider rejects recipient format' => [
-                $providerError('validation_error', 422, 'Invalid `to` field. The email address needs a valid format.'),
+                $providerError(422, 'Invalid `to` field. The email address needs a valid format.'),
                 'Recipient email was rejected',
             ],
             'missing provider resource is not a missing mailbox' => [
-                $providerError('not_found', 404, 'The requested resource was not found.'),
+                $providerError(404, 'The requested resource was not found.'),
                 'Email service resource not found',
             ],
-            'provider scalar error has no type or status metadata' => [
-                new TransportException('Unable to send the notification.', 0, new ErrorException([
-                    'message' => 'Unexpected provider error with re_private_secret_for_test',
-                ])),
+            'nested provider error without status metadata' => [
+                $providerError(0, 'Unexpected provider error with re_private_secret_for_test'),
                 'Could not send notification email',
             ],
             'transport status without nested provider exception' => [
@@ -225,6 +225,7 @@ class ProcessedEmailNotificationTest extends TestCase
 
     public function test_success_sends_the_notification_and_preserves_processing_status(): void
     {
+        $this->freezeTime();
         $request = $this->processingRequest();
 
         $this->postNotification($request->getKey())
@@ -236,6 +237,69 @@ class ProcessedEmailNotificationTest extends TestCase
         Mail::assertSentCount(1);
         Mail::assertNothingQueued();
         $this->assertSame('Processing', $request->fresh()->status);
+        $this->assertTrue($request->fresh()->processed_email_sent_at->equalTo(now()->startOfSecond()));
+    }
+
+    public function test_completion_requires_a_successful_email_even_if_the_client_submits_a_sent_timestamp(): void
+    {
+        $request = $this->processingRequest();
+
+        $this->actingAs(User::factory()->create())
+            ->from(route('requests.processing'))
+            ->patch(route('requests.complete', $request), ['processed_email_sent_at' => now()->toISOString()])
+            ->assertRedirect(route('requests.processing'))
+            ->assertSessionHasErrors([
+                'request' => 'Send the employee notification email before moving this request to Completed.',
+            ]);
+
+        $this->assertSame('Processing', $request->fresh()->status);
+        $this->assertNull($request->fresh()->processed_email_sent_at);
+        Mail::assertNothingSent();
+    }
+
+    public function test_sent_status_reaches_both_modules_and_is_preserved_when_completed(): void
+    {
+        $this->freezeTime();
+        $request = $this->processingRequest();
+
+        $this->postNotification($request->getKey())->assertSessionHasNoErrors();
+        $sentAt = $request->fresh()->processed_email_sent_at->toISOString();
+
+        $this->get(route('requests.processing'))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->component('Processing/Index')
+                ->where('requests.data.0.processed_email_sent_at', $sentAt)
+            );
+
+        $this->from(route('requests.processing'))
+            ->patch(route('requests.complete', $request))
+            ->assertRedirect(route('requests.processing'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('Completed', $request->fresh()->status);
+        $this->assertSame($sentAt, $request->fresh()->processed_email_sent_at->toISOString());
+
+        $this->get(route('requests.completed'))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->component('Completed/Index')
+                ->where('requests.data.0.processed_email_sent_at', $sentAt)
+            );
+
+        Mail::assertSentCount(1);
+    }
+
+    public function test_failed_resend_preserves_the_previous_successful_send_timestamp(): void
+    {
+        $sentAt = now()->subDay()->startOfSecond();
+        $request = $this->processingRequest(['processed_email_sent_at' => $sentAt]);
+        $this->failMailWith(new TransportException('Connection refused'), $request);
+
+        $this->postNotification($request->getKey())
+            ->assertSessionHasErrors('email');
+
+        $this->assertTrue($request->fresh()->processed_email_sent_at->equalTo($sentAt));
     }
 
     private function processingRequest(array $attributes = []): LoiRequest
@@ -265,7 +329,7 @@ class ProcessedEmailNotificationTest extends TestCase
         $mailer->shouldReceive('to')->once()->with($request->email)->andReturn($pendingMail);
 
         $manager = Mockery::mock(MailManager::class);
-        $manager->shouldReceive('mailer')->once()->with('resend')->andReturn($mailer);
+        $manager->shouldReceive('mailer')->once()->with('smtp')->andReturn($mailer);
         Mail::swap($manager);
     }
 }

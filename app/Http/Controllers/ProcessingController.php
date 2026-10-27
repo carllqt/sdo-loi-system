@@ -29,12 +29,19 @@ class ProcessingController extends Controller
 
     public function moveToCompleted(LoiRequest $loiRequest): RedirectResponse
     {
+        if ($loiRequest->status === 'Processing' && ! $loiRequest->processed_email_sent_at) {
+            return back()->withErrors([
+                'request' => 'Send the employee notification email before moving this request to Completed.',
+            ]);
+        }
+
         $updated = LoiRequest::query()
             ->whereKey($loiRequest->getKey())
             ->where('status', 'Processing')
+            ->whereNotNull('processed_email_sent_at')
             ->update(['status' => 'Completed']);
 
-        if (!$updated) {
+        if (! $updated) {
             return back()->withErrors([
                 'request' => 'Only processing requests can be moved to completed.',
             ]);
@@ -59,32 +66,37 @@ class ProcessingController extends Controller
             ]);
         }
 
-        if (!filter_var($loiRequest->email, FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($loiRequest->email, FILTER_VALIDATE_EMAIL)) {
             return back()->withErrors([
                 'email_title' => 'Invalid email address',
                 'email' => 'The employee email address has an invalid format. Correct it before sending.',
             ]);
         }
 
-        if (blank(config('services.resend.key'))) {
+        $mailer = config('mail.default');
+        $transport = config("mail.mailers.{$mailer}.transport");
+
+        if (blank($transport) || in_array($transport, ['log', 'array'], true)) {
             return back()->withErrors([
                 'email_title' => 'Email service is not configured',
-                'email' => 'The email service is not set up yet. Ask your administrator to configure the Resend API key.',
+                'email' => 'The email service is not set up yet. Ask your administrator to configure an outgoing mail service.',
             ]);
         }
 
         $fromAddress = strtolower((string) config('mail.from.address'));
-        if (!filter_var($fromAddress, FILTER_VALIDATE_EMAIL) || str_ends_with($fromAddress, '@example.com')) {
+        if (! filter_var($fromAddress, FILTER_VALIDATE_EMAIL) || str_ends_with($fromAddress, '@example.com')) {
             return back()->withErrors([
                 'email_title' => 'Sender email is not configured',
-                'email' => 'Ask your administrator to set a valid sender email address on a verified Resend domain.',
+                'email' => 'Ask your administrator to set a valid sender email address for the configured mail service.',
             ]);
         }
 
         try {
-            Mail::mailer('resend')
+            Mail::mailer($mailer)
                 ->to($loiRequest->email)
                 ->send(new LoiRequestProcessed($loiRequest));
+
+            $loiRequest->forceFill(['processed_email_sent_at' => now()])->save();
         } catch (Throwable $exception) {
             report($exception);
 
