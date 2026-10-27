@@ -103,9 +103,14 @@ export default function ProcessingTable({ requests }) {
                                     <TableCell className="px-4 py-3 text-muted-foreground">{request.school}</TableCell>
                                     <TableCell className="px-4 py-3 text-muted-foreground">{maskEmail(request.email)}</TableCell>
                                     <TableCell className="px-4 py-3">
-                                        <div className="flex flex-col items-start gap-1.5">
-                                            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${statusClasses(request.status)}`}>
-                                                {request.status}
+                                        <div className="flex items-center gap-1.5">
+                                            <span
+                                                role="img"
+                                                aria-label={request.status}
+                                                title={request.status}
+                                                className={`inline-flex size-7 shrink-0 items-center justify-center rounded-full ${statusClasses(request.status)}`}
+                                            >
+                                                <Clock3 className="size-3.5" aria-hidden="true" />
                                             </span>
                                             <ProcessedEmailStatus sentAt={request.processed_email_sent_at} />
                                         </div>
